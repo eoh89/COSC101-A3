@@ -10,7 +10,7 @@
 * ...
 **************************************************************/
 
-PShape ship; // don't have to use pshape - can use image
+PImage ship; 
 int astroNums=20;
 PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
@@ -18,7 +18,7 @@ float speed = 0;
 float maxSpeed = 4;
 float radians=radians(270); //if your ship is facing up (like in atari game)
 PVector shipCoord;
-PVector direction;
+Float direction = 0.0;
 ArrayList shots= new ArrayList();
 ArrayList sDirections= new ArrayList();
 boolean sUP=false,sDOWN=false,sRIGHT=false,sLEFT=false;
@@ -26,6 +26,10 @@ int score=0;
 boolean alive=true;
 void setup(){
   size(800,800);
+  
+  ship = loadImage("ship.png");
+  ship.resize(50, 0);
+  shipCoord = new PVector(height/2, width/2);
   //initialise pvtecotrs 
   //random astroid initial positions and directions;
   //initialise shapes if needed
@@ -51,13 +55,21 @@ void moveShip(){
   //update rotation,speed and update current location
   //you should also check to make sure your ship is not outside of the window
   if(sUP){
+     shipCoord.x -= cos(direction-42.5)*1;
+     shipCoord.y -= sin(direction-42.5)*1;
   }
-  if(sDOWN){
   
+  if(sDOWN){
+     shipCoord.x += cos(direction-42.5) *1;
+     shipCoord.y += sin(direction-42.5)*1;
   }
+  
   if(sRIGHT){
+    direction += 0.05;
   }
+  
   if(sLEFT){
+   direction -= 0.05;
   }
 }
 void drawShots(){
@@ -74,12 +86,32 @@ void drawAstroids(){
 }
 
 void collisionDetection(){
+ 
   //check if shots have collided with astroids
   //check if ship as collided wiht astroids
 }
 
 void draw(){
+  //Draw ship in coordinates
+ 
   background(0);
+  
+  //Spin the ship based on direction in radians
+  pushMatrix();
+  translate(shipCoord.x, shipCoord.y);
+  rotate(direction);
+  image(ship, -ship.width/2, -ship.height/2);
+  translate(20, 0); // Translate to default Polar Coordinate 0 radians
+
+  popMatrix();
+
+  /*translate(shipCoord.x, shipCoord.y);
+  rotate((float) 1 * direction.x);
+ 
+  rotate((float) -1 * direction.x);
+  translate(-shipCoord.x, -shipCoord.y);
+  */
+  
   //might be worth checking to see if you are still alive first
   moveShip();
   collisionDetection();
