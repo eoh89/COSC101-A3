@@ -14,6 +14,8 @@ PImage ship;
 int astroNums=20;
 PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
+PVector astroRandom;
+float[] destroyed = new float[astroNums];
 float speed = 0;
 float maxSpeed = 4;
 float radians=radians(270); //if your ship is facing up (like in atari game)
@@ -24,9 +26,13 @@ ArrayList sDirections= new ArrayList();
 boolean sUP=false,sDOWN=false,sRIGHT=false,sLEFT=false;
 int score=0;
 boolean alive=true;
+float asteroidSide;
+
 void setup(){
   size(800,800);
-  
+  for(int i=0;i<destroyed.length;i++){
+    destroyed[i] = 0;
+  }
   ship = loadImage("ship.png");
   ship.resize(50, 0);
   shipCoord = new PVector(height/2, width/2);
@@ -82,7 +88,23 @@ void drawAstroids(){
   //otherwise draw at location 
   //initial direction and location should be randomised
   //also make sure the astroid has not moved outside of the window
-    
+  for(int i=0;i<astroids.length;i++){
+    // not spawned in yet
+    if(astroids[i] == null){
+      spawnAsteroid(i);
+    //Has gone off screen
+    } else if (astroids[i].x > 900 || astroids[i].x < -100 || astroids[i].y < -100 || astroids[i].y > 900){
+      spawnAsteroid(i);
+    // if nothing happened
+    } else {
+      //This will keep the asteroid moving
+      astroids[i].add(astroDirect[i]);
+      //This will draw a ellipse to the screen using the coordinates of the asteroid
+      ellipse (astroids[i].x, astroids[i].y, 24, 24);
+      //Fills the asteroid with white(This will probably change)
+      fill(255);
+    }
+  }
 }
 
 void collisionDetection(){
@@ -94,8 +116,8 @@ void collisionDetection(){
 void draw(){
   //Draw ship in coordinates
  
-  background(0);
-  
+  background(125);
+ 
   //Spin the ship based on direction in radians
   pushMatrix();
   translate(shipCoord.x, shipCoord.y);
@@ -157,4 +179,30 @@ void keyReleased() {
       sLEFT=false;
     }
   }
+}
+
+void spawnAsteroid(int i) {
+  //This creates two random floats depending on size of the screen and a random speed variable
+  astroRandom = new PVector(random(0, width), random(0, height), random(-3, 3));
+  //This finds a random side to spawn from
+  asteroidSide = Math.round(random(1, 4));
+  if(asteroidSide == 1){
+    //This will save the coordinates of a asteroid to the top of the screen
+    astroids[i] = new PVector(astroRandom.x , 0);
+  } else if (asteroidSide == 2) {
+    //This will save the coordinates of a asteroid to the left of the screen
+    astroids[i] = new PVector(0, astroRandom.y);
+  } else if (asteroidSide == 3) {
+    ////This will save the coordinates of a asteroid to the bottom of the screen
+    astroids[i] = new PVector(astroRandom.x, 800);
+  } else if (asteroidSide == 4) {
+    //This will save the coordinates of a asteroid to the right of the screen
+    astroids[i] = new PVector(800, astroRandom.y);
+  }
+  //This will set the speed and direction
+  astroDirect[i] = new PVector(random(-4, 4), random(-4, 4));
+  //This will draw a ellipse to the screen using the coordinates of the asteroid
+  ellipse (astroids[i].x, astroids[i].y, 24, 24);
+  //Fills the asteroid with white(This will probably change)
+  fill(255);
 }
