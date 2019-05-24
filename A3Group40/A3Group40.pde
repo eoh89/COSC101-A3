@@ -11,12 +11,14 @@
 **************************************************************/
 
 PImage ship; 
+PImage flame;
 int astroNums=20;
 PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
 PVector astroRandom;
 float[] destroyed = new float[astroNums];
 float speed = 0;
+boolean drift = false;
 float maxSpeed = 4;
 float radians=radians(270); //if your ship is facing up (like in atari game)
 PVector shipCoord;
@@ -27,6 +29,8 @@ boolean sUP=false,sDOWN=false,sRIGHT=false,sLEFT=false;
 int score=0;
 boolean alive=true;
 float asteroidSide;
+int time;
+int wait = 200;
 
 void setup(){
   size(800,800);
@@ -60,14 +64,13 @@ void moveShip(){
      // - this creates smooth movement
   //update rotation,speed and update current location
   //you should also check to make sure your ship is not outside of the window
-  if(sUP){
-     shipCoord.x -= cos(direction-42.5)*1;
-     shipCoord.y -= sin(direction-42.5)*1;
+  if(drift) {
+     shipCoord.x -= cos(direction-42.5)*(maxSpeed * speed);
+     shipCoord.y -= sin(direction-42.5)*(maxSpeed * speed);
   }
-  
-  if(sDOWN){
-     shipCoord.x += cos(direction-42.5) *1;
-     shipCoord.y += sin(direction-42.5)*1;
+  if(sUP){
+     shipCoord.x -= cos(direction-42.5)*maxSpeed;
+     shipCoord.y -= sin(direction-42.5)*maxSpeed;
   }
   
   if(sRIGHT){
@@ -110,13 +113,32 @@ void drawAstroids(){
 void collisionDetection(){
  
   //check if shots have collided with astroids
+  
+  
   //check if ship as collided wiht astroids
+  for(int i=0; i < astroids.length; i++){
+    /* 12 is Asteroid width/2 FIX THIS*/
+    if(shipCoord.x + ship.width/2 > astroids[i].x + 12 && shipCoord.x - ship.width/2 < astroids[i].x - 12 && shipCoord.y + ship.height/2 > astroids[i].y + 12 && shipCoord.y - ship.height/2 < astroids[i].y - 12) {
+          println("CARSON IS A LAND CUCK");
+    }
+  }
+}
+
+void driftShip() {
+  if (millis() - time >= wait) {
+    speed -= 0.1;
+    if(speed <= 0) {
+       drift = false; 
+       speed = 1;
+    }
+    time = millis();
+  } 
 }
 
 void draw(){
   //Draw ship in coordinates
  
-  background(125);
+  background(0);
  
   //Spin the ship based on direction in radians
   pushMatrix();
@@ -136,11 +158,14 @@ void draw(){
   
   //might be worth checking to see if you are still alive first
   moveShip();
-  collisionDetection();
+  driftShip();
   drawShots();
   // draw ship - call shap(..) if Pshape
   // report if game over or won
   drawAstroids();
+  collisionDetection();
+  
+  
   // draw score
 }
 
@@ -148,10 +173,10 @@ void keyPressed() {
   if (key == CODED) {
     if (keyCode == UP) {
       sUP=true;
+      drift = false;
+      speed = 1;
+      time = 0;
     }
-    if (keyCode == DOWN) {
-      sDOWN=true;
-    } 
     if (keyCode == RIGHT) {
       sRIGHT=true;
     }
@@ -168,10 +193,9 @@ void keyReleased() {
   if (key == CODED) {
     if (keyCode == UP) {
       sUP=false;
+      drift = true;
+      time=millis();
     }
-    if (keyCode == DOWN) {
-      sDOWN=false;
-    } 
     if (keyCode == RIGHT) {
       sRIGHT=false;
     }
