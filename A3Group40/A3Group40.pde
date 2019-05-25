@@ -16,6 +16,9 @@ int astroNums=20;
 PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
 PVector astroRandom;
+PShape[] asteroidShape = new PShape[astroNums];
+float[] rotation = new float[astroNums];
+float size = 50;
 float[] destroyed = new float[astroNums];
 float speed = 0;
 boolean drift = false;
@@ -118,18 +121,18 @@ void drawAstroids(){
     // not spawned in yet
     if(astroids[i] == null){
       spawnAsteroid(i);
+      shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     //Has gone off screen
     } else if (astroids[i].x > 900 || astroids[i].x < -100 || astroids[i].y < -100 || astroids[i].y > 900){
       spawnAsteroid(i);
+      shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     // if nothing happened
     } else {
       //This will keep the asteroid moving
       astroids[i].add(astroDirect[i]);
-      
       //This will draw a ellipse to the screen using the coordinates of the asteroid
-      ellipse (astroids[i].x, astroids[i].y, 24, 24);
-      //Fills the asteroid with white(This will probably change)
-      fill(255);
+      asteroidShape[i].rotate(rotation[i]);
+      shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     }
   }
 }
@@ -287,7 +290,16 @@ void spawnAsteroid(int i) {
   //This will set the speed and direction
   astroDirect[i] = new PVector(random(-4, 4), random(-4, 4));
   //This will draw a ellipse to the screen using the coordinates of the asteroid
-  ellipse (astroids[i].x, astroids[i].y, 24, 24);
-  //Fills the asteroid with white(This will probably change)
-  fill(255);
+  rotation[i] = 0.0;
+  asteroidShape[i] = createShape();
+  asteroidShape[i].beginShape();
+  asteroidShape[i].noFill();
+  asteroidShape[i].stroke(200, 200, 200);
+  while (rotation[i] < 2 * PI) {
+    float x = cos(rotation[i]) * size * random(0.8, 1.2);  //Casts a single ray outwards and places a vertex at a point
+    float y = sin(rotation[i]) * size * random(0.8, 1.2);  //on the ray (distance away from the origin is relative to the size)
+    asteroidShape[i].vertex(x, y);
+    rotation[i] += PI / random(5, 20);
+  }
+  asteroidShape[i].endShape(CLOSE);
 }
