@@ -31,12 +31,17 @@ boolean alive=true;
 float asteroidSide;
 int time;
 int wait = 200;
+boolean drawFlame = false;
 
 void setup(){
   size(800,800);
   for(int i=0;i<destroyed.length;i++){
     destroyed[i] = 0;
   }
+  flame = loadImage("flame.png");
+  flame.resize(30, 0);
+  
+  
   ship = loadImage("ship.png");
   ship.resize(50, 0);
   shipCoord = new PVector(height/2, width/2);
@@ -69,6 +74,18 @@ void moveShip(){
      shipCoord.y -= sin(direction-42.5)*(maxSpeed * speed);
   }
   if(sUP){
+    if (shipCoord.x > width) {
+      shipCoord.x = 0;
+    }
+    if(shipCoord.y > height) {
+      shipCoord.y = 0; 
+    }
+     if (shipCoord.x < 0) {
+      shipCoord.x = width;
+    }
+    if(shipCoord.y < 0) {
+      shipCoord.y = height; 
+    }
      shipCoord.x -= cos(direction-42.5)*maxSpeed;
      shipCoord.y -= sin(direction-42.5)*maxSpeed;
   }
@@ -140,24 +157,25 @@ void draw(){
  
   background(0);
  
-  //Spin the ship based on direction in radians
+  //Spin the ship based on direction
   pushMatrix();
   translate(shipCoord.x, shipCoord.y);
   rotate(direction);
+  
   image(ship, -ship.width/2, -ship.height/2);
+  
+  if(drawFlame) {
+   rotate(PI);
+   image(flame, -flame.width/2, -flame.height*1.5); 
+  }
+  
   translate(20, 0); // Translate to default Polar Coordinate 0 radians
 
   popMatrix();
-
-  /*translate(shipCoord.x, shipCoord.y);
-  rotate((float) 1 * direction.x);
- 
-  rotate((float) -1 * direction.x);
-  translate(-shipCoord.x, -shipCoord.y);
-  */
   
   //might be worth checking to see if you are still alive first
   moveShip();
+ 
   driftShip();
   drawShots();
   // draw ship - call shap(..) if Pshape
@@ -172,6 +190,7 @@ void draw(){
 void keyPressed() {
   if (key == CODED) {
     if (keyCode == UP) {
+      drawFlame = true;
       sUP=true;
       drift = false;
       speed = 1;
@@ -192,6 +211,7 @@ void keyPressed() {
 void keyReleased() {
   if (key == CODED) {
     if (keyCode == UP) {
+      drawFlame = false;
       sUP=false;
       drift = true;
       time=millis();
