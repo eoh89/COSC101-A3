@@ -34,6 +34,7 @@ int time;
 int waitIncrease = 50;
 int waitDecrease = 200;
 boolean drawFlame = false;
+int level = 1;
 
 void setup(){
   size(800,800);
@@ -124,6 +125,7 @@ void drawAstroids(){
     } else {
       //This will keep the asteroid moving
       astroids[i].add(astroDirect[i]);
+      
       //This will draw a ellipse to the screen using the coordinates of the asteroid
       ellipse (astroids[i].x, astroids[i].y, 24, 24);
       //Fills the asteroid with white(This will probably change)
@@ -132,16 +134,36 @@ void drawAstroids(){
   }
 }
 
+void nextLevel() {
+  
+}
+
+boolean levelDone() {
+    for(int i=0; i < destroyed.length; i++) {
+     if(destroyed[i] == 0) {
+       return false;
+     } 
+    }
+    return true;
+}
+
 void collisionDetection(){
  
   //check if shots have collided with astroids
-  score++;
-  
+  //Dont run, just a holder for the code
+  if(false) {
+    for(int i=0; i < astroids.length; i++) {
+        if( false /*COLLISION HERE*/) {
+          destroyed[i] = 1;
+          score++;
+        }
+    }
+    
+  }
   
   System.out.println(astroids.length);
   
   //check if ship as collided wiht astroids
-  
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
     if(shipCoord.x - ship.width/2 < astroids[i].x + 12 && shipCoord.x + ship.width/2 > astroids[i].x - 12 && shipCoord.y - ship.height/2 < astroids[i].y + 12 && shipCoord.y + ship.height/2 > astroids[i].y - 12) {
@@ -191,6 +213,12 @@ void draw(){
     // report if game over or won
     drawAstroids();
     collisionDetection();
+  
+    //return if level is done or not
+    if(levelDone()) {
+      level++;
+      nextLevel();
+    }
   } else {
     textSize(50);
     text("GAME OVER", width/3, height/2);
