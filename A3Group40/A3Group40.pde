@@ -34,8 +34,7 @@ int score=0;
 boolean alive=true;
 float asteroidSide;
 int time;
-int waitIncrease = 50;
-int waitDecrease = 200;
+int wait = 200;
 boolean drawFlame = false;
 int level = 1;
 
@@ -68,6 +67,18 @@ void setup(){
         So it is better to keep it up to date, same with usage in the header comment
 
 ***************************************************************/
+void reset() {
+  alive = true;
+  for(int i=0;i<destroyed.length;i++){
+    destroyed[i] = 0;
+  }
+   shipCoord = new PVector(height/2, width/2);
+   astroids = new PVector[astroNums];
+   astroDirect = new PVector[astroNums];
+   drawFlame = false;
+   drift = false;
+   
+}
 
 void moveShip(){
   
@@ -119,7 +130,7 @@ void drawAstroids(){
   //also make sure the astroid has not moved outside of the window
   for(int i=0;i<astroids.length;i++){
     // not spawned in yet
-    if(astroids[i] == null){
+    if(astroids[i] == null ){
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     //Has gone off screen
@@ -127,13 +138,19 @@ void drawAstroids(){
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     // if nothing happened
-    } else {
-      //This will keep the asteroid moving
-      astroids[i].add(astroDirect[i]);
-      //This will draw a ellipse to the screen using the coordinates of the asteroid
-      asteroidShape[i].rotate(rotation[i]);
-      shape(asteroidShape[i], astroids[i].x, astroids[i].y);
+    } 
+    if(destroyed[i] == 1) {
+      //do nothing
     }
+    else {
+          //This will keep the asteroid moving
+          astroids[i].add(astroDirect[i]);
+          //This will draw a ellipse to the screen using the coordinates of the asteroid
+          asteroidShape[i].rotate(rotation[i]);
+          shape(asteroidShape[i], astroids[i].x, astroids[i].y);
+      
+    }
+    
   }
 }
 
@@ -169,14 +186,14 @@ void collisionDetection(){
   //check if ship as collided wiht astroids
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
-    if(shipCoord.x - ship.width/2 < astroids[i].x + 12 && shipCoord.x + ship.width/2 > astroids[i].x - 12 && shipCoord.y - ship.height/2 < astroids[i].y + 12 && shipCoord.y + ship.height/2 > astroids[i].y - 12) {
+    if(shipCoord.x - ship.width/2 < astroids[i].x + 30 && shipCoord.x + ship.width/2 > astroids[i].x - 30 && shipCoord.y - ship.height/2 < astroids[i].y + 30 && shipCoord.y + ship.height/2 > astroids[i].y - 30) {
           alive = false;
     }
   }
 }
 
 void driftShip() {
-  if (millis() - time >= waitDecrease) {
+  if (millis() - time >= wait) {
     speed -= 0.1;
     if(speed <= 0) {
        drift = false; 
@@ -224,11 +241,15 @@ void draw(){
     }
   } else {
     textSize(50);
-    text("GAME OVER", width/3, height/2);
+    text("GAME OVER", width/2 - 150, height/2);
+    textSize(30);
+    text("Press 'Space' to restart", width/2 - 175, height/2 + 30);
   }
   
   
   // draw score
+  textSize(20);
+  text("Score: " + score, 20, 20);
 }
 
 void keyPressed() {
@@ -247,7 +268,11 @@ void keyPressed() {
     }
   }
   if (key == ' ') {
-    //fire a shot
+    if(alive) {
+      //fire a shot
+    } else {
+      reset(); 
+    }
   }
 }
 
