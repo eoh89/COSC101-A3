@@ -20,6 +20,7 @@ PShape[] asteroidShape = new PShape[astroNums];
 float[] rotateSpeed = new float[astroNums];
 float size = 50;
 float[] destroyed = new float[astroNums];
+float gainSpeed = 0;
 float speed = 0;
 boolean drift = false;
 float driftDirection = 0;
@@ -109,8 +110,9 @@ void moveShip(){
      shipCoord.y -= sin(driftDirection-42.5)*(speed);
   }
   if(sUP){
-     shipCoord.x -= cos(direction-42.5)*(maxSpeed);
-     shipCoord.y -= sin(direction-42.5)*(maxSpeed);
+     println("move");
+     shipCoord.x -= cos(direction-42.5)*(gainSpeed);
+     shipCoord.y -= sin(direction-42.5)*(gainSpeed);
   }
   
   if(sRIGHT){
@@ -208,7 +210,6 @@ void collisionDetection(){
           score++;
         }
     }
-    
   }
     
   //check if ship as collided wiht astroids
@@ -225,7 +226,21 @@ void collisionDetection(){
   }
 }
 
+void increaseSpeed() {
+  if(sUP) {
+  if (millis() - time >= wait) {
+    gainSpeed += 0.2;
+    if(gainSpeed >= 4) {
+      gainSpeed = 4; 
+      drift = false; 
+    }
+    time = millis();
+  } 
+  }
+}
+
 void driftShip() {
+  if(drift){
   if (millis() - time >= wait) {
     speed -= 0.1;
     if(speed <= 0) {
@@ -233,6 +248,7 @@ void driftShip() {
     }
     time = millis();
   } 
+  }
 }
 
 void draw(){
@@ -266,6 +282,7 @@ void draw(){
     // report if game over or won
     drawAstroids();
     collisionDetection();
+    increaseSpeed();
   
     //return if level is done or not
     if(levelDone()) {
@@ -285,6 +302,8 @@ void draw(){
   textSize(20);
   text("Score: " + score, 20, 20);
   text("Lives", 20, 40);
+  
+  //draw lives count
   for(int i=0; i < lives; i++) {
    image(ship, 20+i*20, 45); 
   }
@@ -294,10 +313,11 @@ void draw(){
 void keyPressed() {
   if (key == CODED) {
     if (keyCode == UP) {
+      sUP = true;
       drawFlame = true;
-      sUP=true;
-      speed = 4;
+      gainSpeed = speed;
       drift = false;
+      time=millis();
     }
     if (keyCode == RIGHT) {
       sRIGHT=true;
@@ -318,11 +338,12 @@ void keyPressed() {
 void keyReleased() {
   if (key == CODED) {
     if (keyCode == UP) {
+      speed = gainSpeed;
       driftDirection = direction;
       drawFlame = false;
       sUP=false;
       drift = true;
-      time=0;
+      time=millis();
     }
     if (keyCode == RIGHT) {
       sRIGHT=false;
