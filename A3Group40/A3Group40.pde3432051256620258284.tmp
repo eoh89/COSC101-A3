@@ -31,8 +31,7 @@ int score=0;
 boolean alive=true;
 float asteroidSide;
 int time;
-int waitIncrease = 50;
-int waitDecrease = 200;
+int wait = 200;
 boolean drawFlame = false;
 
 void setup(){
@@ -41,11 +40,11 @@ void setup(){
     destroyed[i] = 0;
   }
   flame = loadImage("flame.png");
-  flame.resize(10, 0);
+  flame.resize(30, 0);
   
   
   ship = loadImage("ship.png");
-  ship.resize(20, 0);
+  ship.resize(50, 0);
   shipCoord = new PVector(height/2, width/2);
   //initialise pvtecotrs 
   //random astroid initial positions and directions;
@@ -67,8 +66,16 @@ void setup(){
 
 void moveShip(){
   
-  //detect collision with walls and send it out its opposing wall if so
-  if (shipCoord.x > width) {
+  //this function should update if keys are pressed down 
+     // - this creates smooth movement
+  //update rotation,speed and update current location
+  //you should also check to make sure your ship is not outside of the window
+  if(drift) {
+     shipCoord.x -= cos(driftDirection-42.5)*(maxSpeed * speed);
+     shipCoord.y -= sin(driftDirection-42.5)*(maxSpeed * speed);
+  }
+  if(sUP){
+    if (shipCoord.x > width) {
       shipCoord.x = 0;
     }
     if(shipCoord.y > height) {
@@ -80,19 +87,8 @@ void moveShip(){
     if(shipCoord.y < 0) {
       shipCoord.y = height; 
     }
-    
-    
-  //this function should update if keys are pressed down 
-     // - this creates smooth movement
-  //update rotation,speed and update current location
-  //you should also check to make sure your ship is not outside of the window
-  if(drift) {
-     shipCoord.x -= cos(driftDirection-42.5)*(speed);
-     shipCoord.y -= sin(driftDirection-42.5)*(speed);
-  }
-  if(sUP){
-     shipCoord.x -= cos(direction-42.5)*(maxSpeed);
-     shipCoord.y -= sin(direction-42.5)*(maxSpeed);
+     shipCoord.x -= cos(direction-42.5)*maxSpeed;
+     shipCoord.y -= sin(direction-42.5)*maxSpeed;
   }
   
   if(sRIGHT){
@@ -135,26 +131,33 @@ void drawAstroids(){
 void collisionDetection(){
  
   //check if shots have collided with astroids
-  score++;
-  
-  
-  System.out.println(astroids.length);
+
   
   //check if ship as collided wiht astroids
-  
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
-    if(shipCoord.x - ship.width/2 < astroids[i].x + 12 && shipCoord.x + ship.width/2 > astroids[i].x - 12 && shipCoord.y - ship.height/2 < astroids[i].y + 12 && shipCoord.y + ship.height/2 > astroids[i].y - 12) {
-          alive = false;
+    if(shipCoord.x + ship.width/2 > astroids[i].x + 12 && shipCoord.x - ship.width/2 < astroids[i].x - 12 && shipCoord.y + ship.height/2 > astroids[i].y + 12 && shipCoord.y - ship.height/2 < astroids[i].y - 12) {
+          println("CARSON IS A LAND CUCK");
     }
   }
 }
 
+void increaseVelocity() {
+   if (millis() - time >= wait) {
+    speed -= 0.1;
+    if(speed <= 0) {
+       speed = 4;
+    }
+    time = millis();
+  } 
+}
+
 void driftShip() {
-  if (millis() - time >= waitDecrease) {
+  if (millis() - time >= wait) {
     speed -= 0.1;
     if(speed <= 0) {
        drift = false; 
+       speed = 1;
     }
     time = millis();
   } 
@@ -162,39 +165,34 @@ void driftShip() {
 
 void draw(){
   //Draw ship in coordinates
-  
+ 
   background(0);
+ 
+  //Spin the ship based on direction
+  pushMatrix();
+  translate(shipCoord.x, shipCoord.y);
+  rotate(direction);
   
-  if(alive) {
-    //Spin the ship based on direction
-    pushMatrix();
-    translate(shipCoord.x, shipCoord.y);
-    rotate(direction);
-    
-    image(ship, -ship.width/2, -ship.height/2);
-    
-    if(drawFlame) {
-     rotate(PI);
-     image(flame, -flame.width/2, -flame.height*1.5); 
-    }
-      
-    translate(20, 0); // Translate to default Polar Coordinate 0 radians
+  image(ship, -ship.width/2, -ship.height/2);
   
-    popMatrix();
-    
-    //might be worth checking to see if you are still alive first
-    moveShip();
-    driftShip();
-  
-    drawShots();
-    // draw ship - call shap(..) if Pshape
-    // report if game over or won
-    drawAstroids();
-    collisionDetection();
-  } else {
-    textSize(50);
-    text("GAME OVER", width/3, height/2);
+  if(drawFlame) {
+   rotate(PI);
+   image(flame, -flame.width/2, -flame.height*1.5); 
   }
+  
+  translate(20, 0); // Translate to default Polar Coordinate 0 radians
+
+  popMatrix();
+  
+  //might be worth checking to see if you are still alive first
+  moveShip();
+ 
+  driftShip();
+  drawShots();
+  // draw ship - call shap(..) if Pshape
+  // report if game over or won
+  drawAstroids();
+  collisionDetection();
   
   
   // draw score
@@ -205,8 +203,9 @@ void keyPressed() {
     if (keyCode == UP) {
       drawFlame = true;
       sUP=true;
-      speed = 4;
       drift = false;
+      speed = 1;
+      time = 0;
     }
     if (keyCode == RIGHT) {
       sRIGHT=true;

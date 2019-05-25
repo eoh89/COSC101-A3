@@ -18,6 +18,7 @@ PVector[] astroDirect = new PVector[astroNums];
 PVector astroRandom;
 float[] destroyed = new float[astroNums];
 float speed = 0;
+float startSpeed = 0;
 boolean drift = false;
 float driftDirection = 0;
 float maxSpeed = 4;
@@ -31,8 +32,7 @@ int score=0;
 boolean alive=true;
 float asteroidSide;
 int time;
-int waitIncrease = 50;
-int waitDecrease = 200;
+int wait = 200;
 boolean drawFlame = false;
 
 void setup(){
@@ -87,12 +87,12 @@ void moveShip(){
   //update rotation,speed and update current location
   //you should also check to make sure your ship is not outside of the window
   if(drift) {
-     shipCoord.x -= cos(driftDirection-42.5)*(speed);
-     shipCoord.y -= sin(driftDirection-42.5)*(speed);
+     shipCoord.x -= cos(driftDirection-42.5)*(speed);//maxSpeed * speed);
+     shipCoord.y -= sin(driftDirection-42.5)*(speed);//maxSpeed * speed);
   }
   if(sUP){
-     shipCoord.x -= cos(direction-42.5)*(maxSpeed);
-     shipCoord.y -= sin(direction-42.5)*(maxSpeed);
+     shipCoord.x -= cos(direction-42.5)*(startSpeed);
+     shipCoord.y -= sin(direction-42.5)*(startSpeed);
   }
   
   if(sRIGHT){
@@ -135,26 +135,37 @@ void drawAstroids(){
 void collisionDetection(){
  
   //check if shots have collided with astroids
-  score++;
-  
-  
-  System.out.println(astroids.length);
+
   
   //check if ship as collided wiht astroids
-  
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
-    if(shipCoord.x - ship.width/2 < astroids[i].x + 12 && shipCoord.x + ship.width/2 > astroids[i].x - 12 && shipCoord.y - ship.height/2 < astroids[i].y + 12 && shipCoord.y + ship.height/2 > astroids[i].y - 12) {
-          alive = false;
+    if(shipCoord.x + ship.width/2 > astroids[i].x + 12 && shipCoord.x - ship.width/2 < astroids[i].x - 12 && shipCoord.y + ship.height/2 > astroids[i].y + 12 && shipCoord.y - ship.height/2 < astroids[i].y - 12) {
+          println("CARSON IS A LAND CUCK");
     }
   }
 }
 
+void increaseVelocity() {
+  
+  println(startSpeed);
+  
+   if (millis() - time >= wait) {
+    startSpeed += 0.1;
+    if(startSpeed >= maxSpeed) {
+       startSpeed = maxSpeed;
+    }
+    time = millis();
+  } 
+}
+
 void driftShip() {
-  if (millis() - time >= waitDecrease) {
+ 
+  if (millis() - time >= wait) {
     speed -= 0.1;
     if(speed <= 0) {
        drift = false; 
+       speed = 4;
     }
     time = millis();
   } 
@@ -162,39 +173,35 @@ void driftShip() {
 
 void draw(){
   //Draw ship in coordinates
-  
+ 
   background(0);
+ 
+  //Spin the ship based on direction
+  pushMatrix();
+  translate(shipCoord.x, shipCoord.y);
+  rotate(direction);
   
-  if(alive) {
-    //Spin the ship based on direction
-    pushMatrix();
-    translate(shipCoord.x, shipCoord.y);
-    rotate(direction);
-    
-    image(ship, -ship.width/2, -ship.height/2);
-    
-    if(drawFlame) {
-     rotate(PI);
-     image(flame, -flame.width/2, -flame.height*1.5); 
-    }
-      
-    translate(20, 0); // Translate to default Polar Coordinate 0 radians
+  image(ship, -ship.width/2, -ship.height/2);
   
-    popMatrix();
-    
-    //might be worth checking to see if you are still alive first
-    moveShip();
-    driftShip();
-  
-    drawShots();
-    // draw ship - call shap(..) if Pshape
-    // report if game over or won
-    drawAstroids();
-    collisionDetection();
-  } else {
-    textSize(50);
-    text("GAME OVER", width/3, height/2);
+  if(drawFlame) {
+   rotate(PI);
+   image(flame, -flame.width/2, -flame.height*1.5); 
   }
+  
+  translate(20, 0); // Translate to default Polar Coordinate 0 radians
+
+  popMatrix();
+  
+  //might be worth checking to see if you are still alive first
+  moveShip();
+ 
+  driftShip();
+
+  drawShots();
+  // draw ship - call shap(..) if Pshape
+  // report if game over or won
+  drawAstroids();
+  collisionDetection();
   
   
   // draw score
@@ -203,10 +210,11 @@ void draw(){
 void keyPressed() {
   if (key == CODED) {
     if (keyCode == UP) {
+      increaseVelocity();
       drawFlame = true;
       sUP=true;
-      speed = 4;
       drift = false;
+      time = millis();
     }
     if (keyCode == RIGHT) {
       sRIGHT=true;
@@ -223,6 +231,7 @@ void keyPressed() {
 void keyReleased() {
   if (key == CODED) {
     if (keyCode == UP) {
+      speed = startSpeed;
       driftDirection = direction;
       drawFlame = false;
       sUP=false;
