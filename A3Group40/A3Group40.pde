@@ -17,7 +17,7 @@ PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
 PVector astroRandom;
 PShape[] asteroidShape = new PShape[astroNums];
-float[] rotation = new float[astroNums];
+float[] rotateSpeed = new float[astroNums];
 float size = 50;
 float[] destroyed = new float[astroNums];
 float speed = 0;
@@ -37,6 +37,7 @@ int time;
 int wait = 200;
 boolean drawFlame = false;
 int level = 1;
+int levelSpeed = 1;
 
 void setup(){
   size(800,800);
@@ -130,7 +131,9 @@ void drawAstroids(){
   //also make sure the astroid has not moved outside of the window
   for(int i=0;i<astroids.length;i++){
     // not spawned in yet
-    if(astroids[i] == null ){
+    if(destroyed[i] == 1) {
+      //do nothing
+    } else if(astroids[i] == null ){
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     //Has gone off screen
@@ -138,24 +141,40 @@ void drawAstroids(){
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     // if nothing happened
-    } 
-    if(destroyed[i] == 1) {
-      //do nothing
+    } else {
+      //This will keep the asteroid moving
+      astroids[i].add(astroDirect[i]);
+      //This will draw a ellipse to the screen using the coordinates of the asteroid
+      rotateSpeed[i] = random(0, 0.01);
+      asteroidShape[i].rotate(rotateSpeed[i]);
+      shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     }
-    else {
-          //This will keep the asteroid moving
-          astroids[i].add(astroDirect[i]);
-          //This will draw a ellipse to the screen using the coordinates of the asteroid
-          asteroidShape[i].rotate(rotation[i]);
-          shape(asteroidShape[i], astroids[i].x, astroids[i].y);
-      
-    }
-    
   }
 }
 
 void nextLevel() {
-  
+  switch (level) {
+    case 1:
+      levelSpeed = 1;
+      break;
+    case 2:
+      levelSpeed = 2;
+      break;
+    case 3:
+      levelSpeed = 3;
+      break;
+    case 4:
+      levelSpeed = 4;
+      break;
+    //This will be hard
+    case 5:
+      levelSpeed = 5;
+      break;
+    //You will not survive
+    case 6:
+      levelSpeed = 100;
+      break;
+  }
 }
 
 boolean levelDone() {
@@ -295,8 +314,8 @@ void keyReleased() {
 }
 
 void spawnAsteroid(int i) {
-  //This creates two random floats depending on size of the screen and a random speed variable
-  astroRandom = new PVector(random(0, width), random(0, height), random(-3, 3));
+  //This creates two random floats depending on size of the screen
+  astroRandom = new PVector(random(0, width), random(0, height));
   //This finds a random side to spawn from
   asteroidSide = Math.round(random(1, 4));
   if(asteroidSide == 1){
@@ -313,18 +332,18 @@ void spawnAsteroid(int i) {
     astroids[i] = new PVector(800, astroRandom.y);
   }
   //This will set the speed and direction
-  astroDirect[i] = new PVector(random(-4, 4), random(-4, 4));
+  astroDirect[i] = new PVector(random(-levelSpeed, levelSpeed), random(-levelSpeed, levelSpeed));
   //This will draw a ellipse to the screen using the coordinates of the asteroid
-  rotation[i] = 0.0;
+  float rotation = 0.0;
   asteroidShape[i] = createShape();
   asteroidShape[i].beginShape();
   asteroidShape[i].noFill();
   asteroidShape[i].stroke(200, 200, 200);
-  while (rotation[i] < 2 * PI) {
-    float x = cos(rotation[i]) * size * random(0.8, 1.2);  //Casts a single ray outwards and places a vertex at a point
-    float y = sin(rotation[i]) * size * random(0.8, 1.2);  //on the ray (distance away from the origin is relative to the size)
+  while (rotation < 2 * PI) {
+    float x = cos(rotation) * size * random(0.8, 1.2);  //Casts a single ray outwards and places a vertex at a point
+    float y = sin(rotation) * size * random(0.8, 1.2);  //on the ray (distance away from the origin is relative to the size)
     asteroidShape[i].vertex(x, y);
-    rotation[i] += PI / random(5, 20);
+    rotation += PI / random(5, 10);
   }
   asteroidShape[i].endShape(CLOSE);
 }
