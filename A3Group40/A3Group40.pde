@@ -38,6 +38,7 @@ int wait = 200;
 boolean drawFlame = false;
 int level = 1;
 int levelSpeed = 1;
+int lives = 3;
 
 void setup(){
   size(800,800);
@@ -78,6 +79,7 @@ void reset() {
    astroDirect = new PVector[astroNums];
    drawFlame = false;
    drift = false;
+   lives = 3;
    
 }
 
@@ -177,6 +179,15 @@ void nextLevel() {
   }
 }
 
+void nextLife(){
+  shipCoord = new PVector(height/2, width/2);
+  astroids = new PVector[astroNums];
+  astroDirect = new PVector[astroNums];
+  speed=0;
+  drift=false;
+  
+}
+
 boolean levelDone() {
     for(int i=0; i < destroyed.length; i++) {
      if(destroyed[i] == 0) {
@@ -199,14 +210,17 @@ void collisionDetection(){
     }
     
   }
-  
-  System.out.println(astroids.length);
-  
+    
   //check if ship as collided wiht astroids
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
     if(shipCoord.x - ship.width/2 < astroids[i].x + 30 && shipCoord.x + ship.width/2 > astroids[i].x - 30 && shipCoord.y - ship.height/2 < astroids[i].y + 30 && shipCoord.y + ship.height/2 > astroids[i].y - 30) {
-          alive = false;
+      lives--;
+      nextLife();
+      if(lives == 0) {
+        alive = false;
+      }
+    break;
     }
   }
 }
@@ -262,13 +276,19 @@ void draw(){
     textSize(50);
     text("GAME OVER", width/2 - 150, height/2);
     textSize(30);
-    text("Press 'Space' to restart", width/2 - 175, height/2 + 30);
+    text("Your final score was: " + score, width/2 - 175, height/2 + 30);
+    text("Press 'Space' to restart", width/2 - 175, height/2 + 60);
   }
   
   
   // draw score
   textSize(20);
   text("Score: " + score, 20, 20);
+  text("Lives", 20, 40);
+  for(int i=0; i < lives; i++) {
+   image(ship, 20+i*20, 45); 
+  }
+
 }
 
 void keyPressed() {
