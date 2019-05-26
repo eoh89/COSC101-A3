@@ -33,7 +33,7 @@ ArrayList shots= new ArrayList();
 ArrayList sDirections= new ArrayList();
 boolean sUP=false,sDOWN=false,sRIGHT=false,sLEFT=false;
 int score=0;
-boolean alive=true;
+boolean alive=false;
 float asteroidSide;
 int time;
 int time2;
@@ -43,6 +43,7 @@ boolean drawFlame = false;
 int level = 1;
 int levelSpeed = 1;
 int lives = 3;
+boolean start = true;
 
 void setup(){
   size(800,800);
@@ -81,7 +82,7 @@ void reset() {
    lives = 3;
    loseSpeed = 0;
    gainSpeed = 0;
-   
+   start = true;
 }
 
 
@@ -352,8 +353,15 @@ void driftShip() {
 void draw(){
   //Set black background 
   background(0);
+  if(start) {
+    textSize(100);
+    text("ASTEROIDS", width/2 - 250, height/3);
+    textSize(30);
+    text("Press 'Space' to begin", width/2 - 175, height/2 + 60);
+  }
   //If ship is still alive
-  if(alive) {
+  else {
+    if(alive) {
     //Spin the ship based on direction
     pushMatrix();
     translate(shipCoord.x, shipCoord.y);
@@ -403,6 +411,7 @@ void draw(){
   }
   
   
+  
   // draw score and lives
   textSize(20);
   text("Score: " + score, 20, 20);
@@ -412,7 +421,7 @@ void draw(){
   for(int i=0; i < lives; i++) {
    image(ship, 20+i*20, 45); 
   }
-
+  }
 }
 
 /**************************************************************
@@ -438,10 +447,15 @@ void keyPressed() {
     }
   }
   if (key == ' ') {
-    if(alive) {
-      //fire a shot
+    if(start) {
+      start=false;
+      alive = true;
     } else {
-      reset(); 
+     if(alive) {
+       //fire a shot
+     } else {
+       reset(); 
+     }
     }
   }
 }
