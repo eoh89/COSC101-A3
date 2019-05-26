@@ -13,12 +13,13 @@
 PImage ship; 
 PImage flame;
 int astroNums=20;
+int astroidWidth = 50;
 PVector[] astroids = new PVector[astroNums];
 PVector[] astroDirect = new PVector[astroNums];
 PVector astroRandom;
 PShape[] asteroidShape = new PShape[astroNums];
 float[] rotateSpeed = new float[astroNums];
-float size = 50;
+float astroidSize = 50;
 float[] destroyed = new float[astroNums];
 float gainSpeed = 0;
 float loseSpeed = 0;
@@ -166,7 +167,7 @@ void drawAstroids(){
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
     //If the astroid has gone off screen
-    } else if (astroids[i].x > 900 || astroids[i].x < -100 || astroids[i].y < -100 || astroids[i].y > 900){
+    } else if (astroids[i].x > width + astroidSize*2 || astroids[i].x < 0-astroidSize*2 || astroids[i].y < 0-astroidSize*2 || astroids[i].y > width + astroidSize*2){
       //spawn a new astroid and draw it
       spawnAsteroid(i);
       shape(asteroidShape[i], astroids[i].x, astroids[i].y);
@@ -211,6 +212,8 @@ void nextLevel() {
       levelSpeed = 100;
       break;
   }
+  //set up for next level
+  nextLife();
 }
 
 /**************************************************************
@@ -273,7 +276,7 @@ void collisionDetection(){
   //check if ship as collided wiht astroids
   for(int i=0; i < astroids.length; i++){
     /* 12 is Asteroid width/2 FIX THIS*/
-    if(shipCoord.x - ship.width/2 < astroids[i].x + 30 && shipCoord.x + ship.width/2 > astroids[i].x - 30 && shipCoord.y - ship.height/2 < astroids[i].y + 30 && shipCoord.y + ship.height/2 > astroids[i].y - 30) {
+    if(shipCoord.x - ship.width/2 < astroids[i].x + astroidSize && shipCoord.x + ship.width/2 > astroids[i].x - astroidSize && shipCoord.y - ship.height/2 < astroids[i].y + astroidSize && shipCoord.y + ship.height/2 > astroids[i].y - astroidSize) {
       //Lose a life and progress to next life
       lives--;
       if(lives == 0) {
@@ -520,8 +523,8 @@ void spawnAsteroid(int i) {
   asteroidShape[i].noFill();
   asteroidShape[i].stroke(200, 200, 200);
   while (rotation < 2 * PI) {
-    float x = cos(rotation) * size * random(0.8, 1.2);  //Casts a single ray outwards and places a vertex at a point
-    float y = sin(rotation) * size * random(0.8, 1.2);  //on the ray (distance away from the origin is relative to the size)
+    float x = cos(rotation) * astroidSize * random(0.8, 1.2);  //Casts a single ray outwards and places a vertex at a point
+    float y = sin(rotation) * astroidSize * random(0.8, 1.2);  //on the ray (distance away from the origin is relative to the size)
     asteroidShape[i].vertex(x, y);
     rotation += PI / random(5, 10);
   }
